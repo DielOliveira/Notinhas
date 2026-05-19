@@ -111,7 +111,8 @@
       height: 40px;
       border-radius: 50%;
       padding: 0;
-      font-size: 24px;
+      font-size: 22px;
+      padding: 0;
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -257,6 +258,37 @@
       border-color: #ef476f;
     }
 
+    .hint-area {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 10px;
+    }
+
+    .hint-button {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      padding: 0;
+      font-size: 24px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #ffd166;
+    }
+
+    .hint-image {
+      width: 100%;
+      max-height: 75vh;
+      object-fit: contain;
+      border-radius: 16px;
+      background: #fffaf0;
+    }
+
+    .note-column {
+      display: flex;
+      flex-direction: column;
+    }
+
     .note-bank {
       height: 260px;
       border-radius: 24px;
@@ -328,6 +360,7 @@
         <span>Missão das Notinhas</span>
         <div class="progress-right">
           <span id="progressText">0 / 10</span>
+          <button id="hintButton" class="hint-button" type="button" aria-label="Dica">💡</button>
           <button id="settingsButton" class="settings-button" type="button" aria-label="Configurações">⚙️</button>
         </div>
       </div>
@@ -347,15 +380,27 @@
         <div class="staff-line line-1"></div>
       </div>
 
-      <aside id="noteBank" class="note-bank">
-        <strong>Arraste esta nota</strong>
-        <img id="note" class="draggable-note" src="notinhas/do.png" alt="Notinha musical arrastável" draggable="false" />
-        <button id="restartButton" class="restart-button" type="button">Reiniciar</button>
+      <aside class="note-column">
+        <div id="noteBank" class="note-bank">
+          <strong id="noteLabel">Nota: Dó</strong>
+          <img id="note" class="draggable-note" src="notinhas/do.png" alt="Notinha musical arrastável" draggable="false" />
+          <button id="restartButton" class="restart-button" type="button">Reiniciar</button>
+        </div>
       </aside>
     </section>
 
     <div id="message" class="message"></div>
   </main>
+
+  <div id="hintBackdrop" class="modal-backdrop">
+    <div class="settings-modal" role="dialog" aria-modal="true" aria-labelledby="hintTitle">
+      <h2 id="hintTitle">Dica</h2>
+      <img class="hint-image" src="notinhas/gabarito.png" alt="Gabarito das notas musicais" />
+      <div class="modal-actions">
+        <button id="closeHintButton" type="button">Fechar</button>
+      </div>
+    </div>
+  </div>
 
   <div id="settingsBackdrop" class="modal-backdrop">
     <div class="settings-modal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
@@ -402,6 +447,19 @@
       'Fá agudo': 'notinhas/fa-agudo.png'
     };
 
+    // Coloque seus áudios nesta pasta.
+    // Cada arquivo deve dizer, por exemplo: "Nota Dó", "Nota Ré", etc.
+    const noteAudios = {
+      'Dó': 'audios/nota-do.mp3',
+      'Ré': 'audios/nota-re.mp3',
+      'Mi': 'audios/nota-mi.mp3',
+      'Fá': 'audios/nota-fa.mp3',
+      'Sol': 'audios/nota-sol.mp3',
+      'Lá': 'audios/nota-la.mp3',
+      'Si': 'audios/nota-si.mp3',
+      'Mi agudo': 'audios/nota-mi-agudo.mp3',
+      'Fá agudo': 'audios/nota-fa-agudo.mp3'
+    };
 
     const gameAudios = {
       success: 'audios/acertou.mp3',
@@ -412,6 +470,7 @@
     const staff = document.getElementById('staff');
     const note = document.getElementById('note');
     const noteBank = document.getElementById('noteBank');
+    const noteLabel = document.getElementById('noteLabel');
     const targetName = document.getElementById('targetName');
     const scoreEl = document.getElementById('score') || { textContent: '0' };
     const message = document.getElementById('message');
@@ -426,6 +485,9 @@
     const selectAllNotesButton = document.getElementById('selectAllNotesButton');
     const closeSettingsButton = document.getElementById('closeSettingsButton');
     const saveSettingsButton = document.getElementById('saveSettingsButton');
+    const hintButton = document.getElementById('hintButton');
+    const hintBackdrop = document.getElementById('hintBackdrop');
+    const closeHintButton = document.getElementById('closeHintButton');
 
     let currentNote = null;
     let activeNotes = [...notes];
@@ -478,6 +540,14 @@
       });
     }
 
+    function openHint() {
+      hintBackdrop.classList.add('open');
+    }
+
+    function closeHint() {
+      hintBackdrop.classList.remove('open');
+    }
+
     function openSettings() {
       settingsBackdrop.classList.add('open');
     }
@@ -526,9 +596,18 @@
       audio.play().catch(() => {});
     }
 
-	function playNoteAudio(noteName) {
-	  speakNoteFallback(`Nota ${noteName}`);
-	}
+    function playNoteAudio(noteName) {
+      const audioPath = noteAudios[noteName];
+
+      if (audioPath) {
+        const audio = new Audio(audioPath);
+        audio.play().catch(() => {
+          speakNoteFallback(noteName);
+        });
+      } else {
+        speakNoteFallback(noteName);
+      }
+    }
 
     function speakNoteFallback(noteName) {
       // Plano B: se o arquivo de áudio não existir ou o navegador bloquear,
@@ -584,6 +663,7 @@
 
       currentNote = activeNotes[Math.floor(Math.random() * activeNotes.length)];
       if (targetName) targetName.textContent = currentNote.name;
+      noteLabel.textContent = `Nota: ${currentNote.name}`;
       note.src = noteImages[currentNote.name];
       playNoteAudio(currentNote.name);
       message.textContent = '';
@@ -691,6 +771,11 @@
     if (nextButton) nextButton.addEventListener('click', pickNewNote);
     restartButton.addEventListener('click', restartGame);
     settingsButton.addEventListener('click', openSettings);
+    hintButton.addEventListener('click', openHint);
+    closeHintButton.addEventListener('click', closeHint);
+    hintBackdrop.addEventListener('click', (event) => {
+      if (event.target === hintBackdrop) closeHint();
+    });
     closeSettingsButton.addEventListener('click', closeSettings);
     saveSettingsButton.addEventListener('click', saveSettings);
     selectAllNotesButton.addEventListener('click', selectAllNotes);
