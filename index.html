@@ -821,10 +821,7 @@
       currentLevel = 2;
       completedTrails = trailsToLevelTwo;
       applyCurrentLevel();
-
-      setTimeout(() => {
-        showLevelTransition();
-      }, 1200);
+      showLevelTransition();
     }
 
     function showIntroScreen() {
@@ -882,6 +879,14 @@
       gameFinished = true;
       completedTrails += currentLevel === 1 ? 1 : 0;
       updateLevelDisplay();
+
+      if (currentLevel === 1 && completedTrails >= trailsToLevelTwo) {
+        message.textContent = 'Parabéns! Você completou 5 trilhas. Indo para o nível 2!';
+        message.className = 'message good';
+        advanceToLevelTwo();
+        return;
+      }
+
       playAudioFile(gameAudios.celebration);
 
       celebrationImage.src = `notinhas/parabens${currentCelebrationImage}.png`;
@@ -894,12 +899,6 @@
       staff.classList.add('finished');
       noteBank.classList.add('finished');
       if (nextButton) nextButton.disabled = true;
-      if (currentLevel === 1 && completedTrails >= trailsToLevelTwo) {
-        message.textContent = 'Parabéns! Você completou 5 trilhas. Indo para o nível 2!';
-        message.className = 'message good';
-        advanceToLevelTwo();
-        return;
-      }
 
       message.textContent = currentLevel === 1
         ? `Parabéns! Trilha ${completedTrails} de ${trailsToLevelTwo} completa!`
