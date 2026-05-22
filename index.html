@@ -830,6 +830,7 @@
     function showIntroScreen() {
       gameStarted = false;
       gameFinished = false;
+      startButton.textContent = 'Começar';
       staff.classList.add('intro');
       noteBank.classList.add('intro');
       staff.classList.remove('finished', 'level-transition');
@@ -843,6 +844,7 @@
       gameStarted = false;
       gameFinished = true;
       pendingLevelTwoStart = true;
+      startButton.textContent = 'Avançar';
       staff.classList.remove('intro', 'finished');
       noteBank.classList.remove('intro', 'finished');
       staff.classList.add('level-transition');
@@ -854,6 +856,7 @@
 
     function startLevelTwo() {
       pendingLevelTwoStart = false;
+      startButton.textContent = 'Começar';
       staff.classList.remove('level-transition');
       noteBank.classList.remove('level-transition');
       restartGame();
