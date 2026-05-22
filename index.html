@@ -359,6 +359,9 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-user-drag: none;
     }
 
     .side-gif {
@@ -368,6 +371,7 @@
       display: none;
       pointer-events: none;
       user-select: none;
+      -webkit-user-select: none;
       -webkit-user-drag: none;
     }
 
@@ -386,7 +390,9 @@
 
     #noteLabel {
       user-select: none;
+      -webkit-user-select: none;
       pointer-events: none;
+      -webkit-user-drag: none;
     }
 
     .note-bank.finished #note,
@@ -1062,6 +1068,11 @@
     note.addEventListener('mousedown', startDrag);
     window.addEventListener('mousemove', moveDrag);
     window.addEventListener('mouseup', endDrag);
+    document.addEventListener('dragstart', (event) => {
+      if (event.target !== note) {
+        event.preventDefault();
+      }
+    });
 
     note.addEventListener('touchstart', startDrag, { passive: false });
     window.addEventListener('touchmove', (event) => {
