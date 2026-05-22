@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Jogo das Notinhas</title>
   <style>
     * { box-sizing: border-box; }
@@ -15,7 +15,9 @@
       display: flex;
       justify-content: center;
       min-height: 100vh;
-      padding: 20px;
+      min-height: 100dvh;
+      padding: calc(20px + env(safe-area-inset-top, 0px)) 20px 20px;
+      scroll-padding-top: calc(20px + env(safe-area-inset-top, 0px));
     }
 
     .game {
@@ -57,6 +59,7 @@
       justify-content: space-between;
       align-items: center;
       gap: 12px;
+      flex-wrap: wrap;
       margin-bottom: 8px;
       font-weight: bold;
       font-size: 16px;
@@ -488,7 +491,23 @@
     .message.good { color: #087f5b; }
     .message.bad { color: #c9184a; }
 
+    @media (max-width: 1024px) {
+      body {
+        padding-top: calc(72px + env(safe-area-inset-top, 0px));
+        scroll-padding-top: calc(72px + env(safe-area-inset-top, 0px));
+      }
+    }
+
     @media (max-width: 760px) {
+      .progress-label {
+        align-items: flex-start;
+      }
+
+      .progress-right {
+        width: 100%;
+        justify-content: space-between;
+      }
+
       .board { grid-template-columns: 1fr; }
       .side-panels {
         display: grid;
@@ -504,6 +523,11 @@
     }
 
     @media (max-width: 460px) {
+      body {
+        padding-top: calc(64px + env(safe-area-inset-top, 0px));
+        padding-inline: 12px;
+      }
+
       .side-panels { grid-template-columns: 1fr; }
       .gif-panel { aspect-ratio: 1.6 / 1; }
     }
