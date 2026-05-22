@@ -663,7 +663,6 @@
 
     const settingsStorageKey = 'jogoNotinhasNotasSelecionadas';
     const noteAudioStorageKey = 'jogoNotinhasAudioNotas';
-    let currentCelebrationImage = 1;
 
     function getSavedNoteNames() {
       try {
@@ -842,6 +841,11 @@
       showLevelTransition();
     }
 
+    function getCelebrationImageNumber() {
+      const levelOffset = currentLevel === 1 ? 0 : 5;
+      return levelOffset + Math.min(completedTrails, trailsPerLevel);
+    }
+
     function showIntroScreen() {
       gameStarted = false;
       gameFinished = false;
@@ -907,13 +911,7 @@
 
       playAudioFile(gameAudios.celebration);
 
-      celebrationImage.src = `notinhas/parabens${currentCelebrationImage}.png`;
-
-      currentCelebrationImage += 1;
-
-      if (currentCelebrationImage > 10) {
-        currentCelebrationImage = 1;
-      }
+      celebrationImage.src = `notinhas/parabens${getCelebrationImageNumber()}.png`;
       staff.classList.add('finished');
       noteBank.classList.add('finished');
       if (nextButton) nextButton.disabled = true;
