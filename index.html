@@ -447,6 +447,28 @@
       filter: drop-shadow(0 4px 6px rgba(0,0,0,.22));
     }
 
+    .repeat-note-button {
+      display: none;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      padding: 0;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      background: #ffd166;
+    }
+
+    .note-bank.hard-level .repeat-note-button {
+      display: inline-flex;
+    }
+
+    .note-bank.intro .repeat-note-button,
+    .note-bank.level-transition .repeat-note-button,
+    .note-bank.finished .repeat-note-button {
+      display: none;
+    }
+
     .draggable-note.dragging {
       position: fixed;
       z-index: 1000;
@@ -530,6 +552,7 @@
         <div id="noteBank" class="note-bank">
           <strong id="noteLabel">Nota: Dó</strong>
           <img id="note" class="draggable-note" src="notinhas/do.png" alt="Notinha musical arrastável" draggable="false" />
+          <button id="repeatNoteButton" class="repeat-note-button" type="button" aria-label="Ouvir nota novamente" title="Ouvir nota novamente">🔊</button>
           <button id="startButton" class="start-button" type="button">Começar</button>
           <button id="restartButton" class="restart-button" type="button"></button>
         </div>
@@ -644,6 +667,7 @@
     const levelText = document.getElementById('levelText');
     const trailText = document.getElementById('trailText');
     const nextButton = document.getElementById('nextButton');
+    const repeatNoteButton = document.getElementById('repeatNoteButton');
     const startButton = document.getElementById('startButton');
     const restartButton = document.getElementById('restartButton');
     const celebrationImage = document.getElementById('celebrationImage');
@@ -955,13 +979,20 @@
 
     function updateNoteVisual() {
       if (difficulty === 'hard') {
+        noteBank.classList.add('hard-level');
         note.classList.add('hard-note');
         note.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 42 42"><circle cx="21" cy="21" r="21" fill="black"/></svg>';
         return;
       }
 
+      noteBank.classList.remove('hard-level');
       note.classList.remove('hard-note');
       note.src = noteImages[currentNote.name];
+    }
+
+    function repeatCurrentNoteAudio() {
+      if (!currentNote || difficulty !== 'hard' || !gameStarted || gameFinished) return;
+      speakNote(currentNote.name);
     }
 
     function pickNewNote() {
@@ -1082,6 +1113,7 @@
     window.addEventListener('touchend', endDrag);
 
     if (nextButton) nextButton.addEventListener('click', pickNewNote);
+    repeatNoteButton.addEventListener('click', repeatCurrentNoteAudio);
     startButton.addEventListener('click', startGame);
     restartButton.addEventListener('click', restartGame);
     settingsButton.addEventListener('click', openSettings);
