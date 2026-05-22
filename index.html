@@ -402,6 +402,10 @@
       display: block;
     }
 
+    .note-bank.finished .restart-button::before {
+      content: 'Avançar';
+    }
+
     .note-bank.intro .start-button {
       display: block;
     }
@@ -513,7 +517,7 @@
           <strong id="noteLabel">Nota: Dó</strong>
           <img id="note" class="draggable-note" src="notinhas/do.png" alt="Notinha musical arrastável" draggable="false" />
           <button id="startButton" class="start-button" type="button">Começar</button>
-          <button id="restartButton" class="restart-button" type="button">Reiniciar</button>
+          <button id="restartButton" class="restart-button" type="button"></button>
         </div>
       </aside>
     </section>
