@@ -413,28 +413,6 @@
       filter: drop-shadow(0 4px 6px rgba(0,0,0,.22));
     }
 
-    .difficulty-options {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin: 12px 0 18px;
-    }
-
-    .difficulty-option {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: #f6f3ec;
-      border-radius: 12px;
-      padding: 10px 12px;
-      font-weight: bold;
-    }
-
-    .difficulty-option input {
-      width: 20px;
-      height: 20px;
-    }
-
     .draggable-note.dragging {
       position: fixed;
       z-index: 1000;
@@ -893,7 +871,7 @@
 
       currentCelebrationImage += 1;
 
-      if (currentCelebrationImage > 24) {
+      if (currentCelebrationImage > 10) {
         currentCelebrationImage = 1;
       }
       staff.classList.add('finished');
