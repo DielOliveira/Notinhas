@@ -66,6 +66,7 @@
       display: flex;
       align-items: center;
       gap: 10px;
+      flex-wrap: wrap;
     }
 
     .progress-bar {
@@ -91,6 +92,15 @@
       background: #f1efe8;
       border-radius: 16px;
       padding: 12px 16px;
+    }
+
+    .level-pill {
+      font-size: 15px;
+      font-weight: bold;
+      background: #f1efe8;
+      border-radius: 999px;
+      padding: 8px 12px;
+      white-space: nowrap;
     }
 
     button {
@@ -221,6 +231,38 @@
       display: block;
     }
 
+    .intro-panel,
+    .level-transition-panel {
+      position: absolute;
+      inset: 0;
+      z-index: 18;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 28px;
+      background: #fffaf0;
+    }
+
+    .staff-wrap.intro .intro-panel,
+    .staff-wrap.level-transition .level-transition-panel {
+      display: flex;
+    }
+
+    .staff-wrap.intro .staff-line,
+    .staff-wrap.intro .drop-zone,
+    .staff-wrap.level-transition .staff-line,
+    .staff-wrap.level-transition .drop-zone {
+      display: none;
+    }
+
+    .intro-image,
+    .level-transition-image {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: #fffaf0;
+    }
+
     .line-5 { top: 105px; }
     .line-4 { top: 165px; }
     .line-3 { top: 225px; }
@@ -284,13 +326,35 @@
       background: #fffaf0;
     }
 
-    .note-column {
+    .side-panels {
       display: flex;
       flex-direction: column;
+      gap: 16px;
+      height: 470px;
+    }
+
+    .gif-panel {
+      width: 100%;
+      flex: 1 1 auto;
+      border-radius: 24px;
+      background: #e200d6;
+      border: 4px solid #111;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .side-gif {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: none;
     }
 
     .note-bank {
       height: 260px;
+      flex: 0 0 260px;
       border-radius: 24px;
       background: #f1efe8;
       padding: 18px;
@@ -302,11 +366,16 @@
     }
 
     .note-bank.finished #note,
-    .note-bank.finished strong {
+    .note-bank.finished strong,
+    .note-bank.intro #note,
+    .note-bank.intro strong,
+    .note-bank.level-transition #note,
+    .note-bank.level-transition strong {
       display: none;
     }
 
-    .restart-button {
+    .restart-button,
+    .start-button {
       display: none;
       background: #06d6a0;
       font-size: 20px;
@@ -314,6 +383,14 @@
     }
 
     .note-bank.finished .restart-button {
+      display: block;
+    }
+
+    .note-bank.intro .start-button {
+      display: block;
+    }
+
+    .note-bank.level-transition .start-button {
       display: block;
     }
 
@@ -325,6 +402,37 @@
       user-select: none;
       touch-action: none;
       filter: drop-shadow(0 4px 6px rgba(0,0,0,.22));
+    }
+
+    .draggable-note.hard-note {
+      width: 42px;
+      height: 42px;
+      background: #111;
+      border-radius: 50%;
+      object-fit: contain;
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,.22));
+    }
+
+    .difficulty-options {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 12px 0 18px;
+    }
+
+    .difficulty-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #f6f3ec;
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-weight: bold;
+    }
+
+    .difficulty-option input {
+      width: 20px;
+      height: 20px;
     }
 
     .draggable-note.dragging {
@@ -348,8 +456,22 @@
 
     @media (max-width: 760px) {
       .board { grid-template-columns: 1fr; }
-      .note-bank { height: 160px; }
+      .side-panels {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        height: auto;
+      }
+      .note-bank {
+        height: 160px;
+        flex-basis: auto;
+      }
+      .gif-panel { aspect-ratio: 1.6 / 1; }
       .staff-wrap { height: 430px; }
+    }
+
+    @media (max-width: 460px) {
+      .side-panels { grid-template-columns: 1fr; }
+      .gif-panel { aspect-ratio: 1.6 / 1; }
     }
   </style>
 </head>
@@ -359,6 +481,8 @@
       <div class="progress-label">
         <span>Missão das Notinhas</span>
         <div class="progress-right">
+          <span id="levelText" class="level-pill">Nível 1</span>
+          <span id="trailText" class="level-pill">Trilhas 0 / 5</span>
           <span id="progressText">0 / 10</span>
           <button id="hintButton" class="hint-button" type="button" aria-label="Dica">💡</button>
           <button id="settingsButton" class="settings-button" type="button" aria-label="Configurações">⚙️</button>
@@ -372,6 +496,12 @@
 
     <section class="board">
       <div id="staff" class="staff-wrap" aria-label="Pentagrama musical">
+        <div id="introPanel" class="intro-panel">
+          <img class="intro-image" src="notinhas/intro.png" alt="Mago guiando personagens musicais para o pentagrama" />
+        </div>
+        <div id="levelTransitionPanel" class="level-transition-panel">
+          <img class="level-transition-image" src="notinhas/sujas.png" alt="Notinhas musicais sujas no nível difícil" />
+        </div>
         <img id="celebrationImage" class="celebration-image" src="notinhas/parabens1.png" alt="Parabéns" />
         <div class="staff-line line-5"></div>
         <div class="staff-line line-4"></div>
@@ -380,10 +510,15 @@
         <div class="staff-line line-1"></div>
       </div>
 
-      <aside class="note-column">
+      <aside class="side-panels" aria-label="Painéis de apoio">
+        <div class="gif-panel">
+          <img id="sideGif" class="side-gif" alt="" />
+        </div>
+
         <div id="noteBank" class="note-bank">
           <strong id="noteLabel">Nota: Dó</strong>
           <img id="note" class="draggable-note" src="notinhas/do.png" alt="Notinha musical arrastável" draggable="false" />
+          <button id="startButton" class="start-button" type="button">Começar</button>
           <button id="restartButton" class="restart-button" type="button">Reiniciar</button>
         </div>
       </aside>
@@ -447,25 +582,38 @@
       'Fá agudo': 'notinhas/fa-agudo.png'
     };
 
-    // Coloque seus áudios nesta pasta.
-    // Cada arquivo deve dizer, por exemplo: "Nota Dó", "Nota Ré", etc.
-    const noteAudios = {
-      'Dó': 'audios/nota-do.mp3',
-      'Ré': 'audios/nota-re.mp3',
-      'Mi': 'audios/nota-mi.mp3',
-      'Fá': 'audios/nota-fa.mp3',
-      'Sol': 'audios/nota-sol.mp3',
-      'Lá': 'audios/nota-la.mp3',
-      'Si': 'audios/nota-si.mp3',
-      'Mi agudo': 'audios/nota-mi-agudo.mp3',
-      'Fá agudo': 'audios/nota-fa-agudo.mp3'
-    };
-
     const gameAudios = {
       success: 'audios/acertou.mp3',
       celebration: 'audios/comemoracao.mp3',
       wrong: 'audios/ahh-nao.mp3'
     };
+
+    const angryWizardFrames = [
+      'notinhas/bruxinho-raiva-pulando-1.png',
+      'notinhas/bruxinho-raiva-pulando-2.png',
+      'notinhas/bruxinho-raiva-pulando-3.png',
+      'notinhas/bruxinho-raiva-pulando-4.png',
+      'notinhas/bruxinho-raiva-pulando-5.png',
+      'notinhas/bruxinho-raiva-pulando-6.png'
+    ];
+
+    const laughingWizardFrames = [
+      'notinhas/bruxinho-gargalhando-1.png',
+      'notinhas/bruxinho-gargalhando-2.png',
+      'notinhas/bruxinho-gargalhando-3.png',
+      'notinhas/bruxinho-gargalhando-4.png',
+      'notinhas/bruxinho-gargalhando-5.png',
+      'notinhas/bruxinho-gargalhando-6.png'
+    ];
+
+    const waitingWizardFrames = [
+      'notinhas/bruxinho-esperando-1.png',
+      'notinhas/bruxinho-esperando-2.png',
+      'notinhas/bruxinho-esperando-3.png',
+      'notinhas/bruxinho-esperando-4.png',
+      'notinhas/bruxinho-esperando-5.png',
+      'notinhas/bruxinho-esperando-6.png'
+    ];
 
     const staff = document.getElementById('staff');
     const note = document.getElementById('note');
@@ -476,7 +624,10 @@
     const message = document.getElementById('message');
     const progressFill = document.getElementById('progressFill');
     const progressText = document.getElementById('progressText');
+    const levelText = document.getElementById('levelText');
+    const trailText = document.getElementById('trailText');
     const nextButton = document.getElementById('nextButton');
+    const startButton = document.getElementById('startButton');
     const restartButton = document.getElementById('restartButton');
     const celebrationImage = document.getElementById('celebrationImage');
     const settingsButton = document.getElementById('settingsButton');
@@ -488,14 +639,23 @@
     const hintButton = document.getElementById('hintButton');
     const hintBackdrop = document.getElementById('hintBackdrop');
     const closeHintButton = document.getElementById('closeHintButton');
+    const sideGif = document.getElementById('sideGif');
 
     let currentNote = null;
     let activeNotes = [...notes];
     let score = 0;
     let streak = 0;
     let isDragging = false;
+    let gameStarted = false;
     let gameFinished = false;
     let zones = [];
+    let difficulty = 'easy';
+    let sideAnimationTimer = null;
+    let currentLevel = 1;
+    let completedTrails = 0;
+    let pendingLevelTwoStart = false;
+
+    const trailsToLevelTwo = 5;
 
     const settingsStorageKey = 'jogoNotinhasNotasSelecionadas';
     let currentCelebrationImage = 1;
@@ -568,7 +728,9 @@
       activeNotes = notes.filter(item => selectedNames.includes(item.name));
       saveNoteNames(selectedNames);
       closeSettings();
-      restartGame();
+      if (gameStarted) {
+        restartGame();
+      }
     }
 
     function selectAllNotes() {
@@ -596,22 +758,40 @@
       audio.play().catch(() => {});
     }
 
-    function playNoteAudio(noteName) {
-      const audioPath = noteAudios[noteName];
+    function playSideAnimation(frames, options = {}) {
+      if (frames.length === 0) return;
 
-      if (audioPath) {
-        const audio = new Audio(audioPath);
-        audio.play().catch(() => {
-          speakNoteFallback(noteName);
-        });
-      } else {
-        speakNoteFallback(noteName);
-      }
+      if (sideAnimationTimer) clearInterval(sideAnimationTimer);
+
+      const loops = options.loops || Infinity;
+      const nextFrames = options.nextFrames || null;
+      let frameIndex = 0;
+      let completedLoops = 0;
+      sideGif.src = frames[frameIndex];
+      sideGif.style.display = 'block';
+
+      sideAnimationTimer = setInterval(() => {
+        frameIndex = (frameIndex + 1) % frames.length;
+        if (frameIndex === 0) {
+          completedLoops += 1;
+
+          if (completedLoops >= loops) {
+            clearInterval(sideAnimationTimer);
+            sideAnimationTimer = null;
+
+            if (nextFrames) {
+              playSideAnimation(nextFrames);
+            }
+            return;
+          }
+        }
+
+        sideGif.src = frames[frameIndex];
+      }, 260);
     }
 
-    function speakNoteFallback(noteName) {
-      // Plano B: se o arquivo de áudio não existir ou o navegador bloquear,
-      // tenta falar usando a voz do próprio navegador.
+    function speakNote(noteName) {
+      // Fala a nota usando a voz do próprio navegador.
       if (!('speechSynthesis' in window)) return;
 
       window.speechSynthesis.cancel();
@@ -627,45 +807,139 @@
       progressText.textContent = `${streak} / 10`;
     }
 
+    function updateLevelDisplay() {
+      levelText.textContent = `Nível ${currentLevel}`;
+      trailText.textContent = `Trilhas ${Math.min(completedTrails, trailsToLevelTwo)} / ${trailsToLevelTwo}`;
+    }
+
+    function applyCurrentLevel() {
+      difficulty = currentLevel >= 2 ? 'hard' : 'easy';
+      updateLevelDisplay();
+    }
+
+    function advanceToLevelTwo() {
+      currentLevel = 2;
+      completedTrails = trailsToLevelTwo;
+      applyCurrentLevel();
+
+      setTimeout(() => {
+        showLevelTransition();
+      }, 1200);
+    }
+
+    function showIntroScreen() {
+      gameStarted = false;
+      gameFinished = false;
+      staff.classList.add('intro');
+      noteBank.classList.add('intro');
+      staff.classList.remove('finished', 'level-transition');
+      noteBank.classList.remove('finished', 'level-transition');
+      message.textContent = '';
+      message.className = 'message';
+      zones.forEach(zone => zone.className = 'drop-zone');
+    }
+
+    function showLevelTransition() {
+      gameStarted = false;
+      gameFinished = true;
+      pendingLevelTwoStart = true;
+      staff.classList.remove('intro', 'finished');
+      noteBank.classList.remove('intro', 'finished');
+      staff.classList.add('level-transition');
+      noteBank.classList.add('level-transition');
+      message.textContent = 'Nível difícil desbloqueado!';
+      message.className = 'message good';
+      zones.forEach(zone => zone.className = 'drop-zone');
+    }
+
+    function startLevelTwo() {
+      pendingLevelTwoStart = false;
+      staff.classList.remove('level-transition');
+      noteBank.classList.remove('level-transition');
+      restartGame();
+      message.textContent = 'Nível 2! Agora a notinha fica sem desenho.';
+      message.className = 'message good';
+    }
+
+    function startGame() {
+      if (pendingLevelTwoStart) {
+        startLevelTwo();
+        return;
+      }
+
+      gameStarted = true;
+      staff.classList.remove('intro');
+      staff.classList.remove('level-transition');
+      noteBank.classList.remove('intro');
+      noteBank.classList.remove('level-transition');
+      restartGame();
+    }
+
     function finishGame() {
       gameFinished = true;
+      completedTrails += currentLevel === 1 ? 1 : 0;
+      updateLevelDisplay();
       playAudioFile(gameAudios.celebration);
 
       celebrationImage.src = `notinhas/parabens${currentCelebrationImage}.png`;
 
       currentCelebrationImage += 1;
 
-      if (currentCelebrationImage > 20) {
+      if (currentCelebrationImage > 24) {
         currentCelebrationImage = 1;
       }
       staff.classList.add('finished');
       noteBank.classList.add('finished');
       if (nextButton) nextButton.disabled = true;
-      message.textContent = 'Parabéns! Você completou a barra!';
+      if (currentLevel === 1 && completedTrails >= trailsToLevelTwo) {
+        message.textContent = 'Parabéns! Você completou 5 trilhas. Indo para o nível 2!';
+        message.className = 'message good';
+        advanceToLevelTwo();
+        return;
+      }
+
+      message.textContent = currentLevel === 1
+        ? `Parabéns! Trilha ${completedTrails} de ${trailsToLevelTwo} completa!`
+        : 'Parabéns! Você completou a barra!';
       message.className = 'message good';
     }
 
     function restartGame() {
       score = 0;
       streak = 0;
+      gameStarted = true;
       gameFinished = false;
       scoreEl.textContent = score;
+      applyCurrentLevel();
       updateProgress();
       staff.classList.remove('finished');
+      staff.classList.remove('intro', 'level-transition');
       noteBank.classList.remove('finished');
+      noteBank.classList.remove('intro', 'level-transition');
       if (nextButton) nextButton.disabled = false;
       zones.forEach(zone => zone.className = 'drop-zone');
       pickNewNote();
     }
 
+    function updateNoteVisual() {
+      if (difficulty === 'hard') {
+        note.classList.add('hard-note');
+        note.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 42 42"><circle cx="21" cy="21" r="21" fill="black"/></svg>';
+        return;
+      }
+
+      note.classList.remove('hard-note');
+      note.src = noteImages[currentNote.name];
+    }
+
     function pickNewNote() {
-      if (gameFinished) return;
+      if (!gameStarted || gameFinished) return;
 
       currentNote = activeNotes[Math.floor(Math.random() * activeNotes.length)];
       if (targetName) targetName.textContent = currentNote.name;
       noteLabel.textContent = `Nota: ${currentNote.name}`;
-      note.src = noteImages[currentNote.name];
-      playNoteAudio(currentNote.name);
+      updateNoteVisual();
+      speakNote(currentNote.name);
       message.textContent = '';
       message.className = 'message';
       zones.forEach(zone => zone.className = 'drop-zone');
@@ -690,7 +964,7 @@
     }
 
     function startDrag(event) {
-      if (gameFinished) return;
+      if (!gameStarted || gameFinished) return;
 
       isDragging = true;
       showZones();
@@ -724,6 +998,7 @@
 
       if (zone.dataset.name === currentNote.name) {
         zone.classList.add('correct');
+        playSideAnimation(angryWizardFrames, { loops: 2, nextFrames: waitingWizardFrames });
         score += 1;
         streak += 1;
         playAudioFile(gameAudios.success);
@@ -740,6 +1015,7 @@
         setTimeout(pickNewNote, 900);
       } else {
         zone.classList.add('wrong');
+        playSideAnimation(laughingWizardFrames, { loops: 2, nextFrames: waitingWizardFrames });
         playAudioFile(gameAudios.wrong);
         message.textContent = `Ops! Essa posição é ${zone.dataset.name}. Tente novamente.`;
         message.className = 'message bad';
@@ -769,6 +1045,7 @@
     window.addEventListener('touchend', endDrag);
 
     if (nextButton) nextButton.addEventListener('click', pickNewNote);
+    startButton.addEventListener('click', startGame);
     restartButton.addEventListener('click', restartGame);
     settingsButton.addEventListener('click', openSettings);
     hintButton.addEventListener('click', openHint);
@@ -785,9 +1062,11 @@
 
     activeNotes = notes.filter(item => getSavedNoteNames().includes(item.name));
 
+    applyCurrentLevel();
+    playSideAnimation(waitingWizardFrames);
     createSettingsOptions();
     createZones();
-    pickNewNote();
+    showIntroScreen();
   </script>
 </body>
 </html>
