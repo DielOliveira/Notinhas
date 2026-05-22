@@ -659,7 +659,7 @@
     let completedTrails = 0;
     let pendingLevelTwoStart = false;
 
-    const trailsToLevelTwo = 5;
+    const trailsPerLevel = 5;
 
     const settingsStorageKey = 'jogoNotinhasNotasSelecionadas';
     const noteAudioStorageKey = 'jogoNotinhasAudioNotas';
@@ -827,7 +827,7 @@
 
     function updateLevelDisplay() {
       levelText.textContent = `Nível ${currentLevel}`;
-      trailText.textContent = `Trilhas ${Math.min(completedTrails, trailsToLevelTwo)} / ${trailsToLevelTwo}`;
+      trailText.textContent = `Trilhas ${Math.min(completedTrails, trailsPerLevel)} / ${trailsPerLevel}`;
     }
 
     function applyCurrentLevel() {
@@ -837,7 +837,7 @@
 
     function advanceToLevelTwo() {
       currentLevel = 2;
-      completedTrails = trailsToLevelTwo;
+      completedTrails = 0;
       applyCurrentLevel();
       showLevelTransition();
     }
@@ -895,10 +895,10 @@
 
     function finishGame() {
       gameFinished = true;
-      completedTrails += currentLevel === 1 ? 1 : 0;
+      completedTrails += 1;
       updateLevelDisplay();
 
-      if (currentLevel === 1 && completedTrails >= trailsToLevelTwo) {
+      if (currentLevel === 1 && completedTrails >= trailsPerLevel) {
         message.textContent = 'Parabéns! Você completou 5 trilhas. Indo para o nível 2!';
         message.className = 'message good';
         advanceToLevelTwo();
@@ -919,7 +919,7 @@
       if (nextButton) nextButton.disabled = true;
 
       message.textContent = currentLevel === 1
-        ? `Parabéns! Trilha ${completedTrails} de ${trailsToLevelTwo} completa!`
+        ? `Parabéns! Trilha ${completedTrails} de ${trailsPerLevel} completa!`
         : 'Parabéns! Você completou a barra!';
       message.className = 'message good';
     }
