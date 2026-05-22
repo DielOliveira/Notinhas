@@ -178,6 +178,22 @@
       height: 20px;
     }
 
+    .sound-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #f6f3ec;
+      border-radius: 12px;
+      padding: 10px;
+      margin: 16px 0 20px;
+      font-weight: bold;
+    }
+
+    .sound-option input {
+      width: 20px;
+      height: 20px;
+    }
+
     .modal-actions {
       display: flex;
       gap: 10px;
@@ -522,6 +538,11 @@
 
       <div id="noteOptions" class="note-options"></div>
 
+      <label class="sound-option">
+        <input id="noteAudioToggle" type="checkbox" checked />
+        Tocar áudio com o nome das notas
+      </label>
+
       <div class="modal-actions">
         <button id="selectAllNotesButton" class="secondary-button" type="button">Todas</button>
         <button id="closeSettingsButton" class="secondary-button" type="button">Cancelar</button>
@@ -611,6 +632,7 @@
     const settingsButton = document.getElementById('settingsButton');
     const settingsBackdrop = document.getElementById('settingsBackdrop');
     const noteOptions = document.getElementById('noteOptions');
+    const noteAudioToggle = document.getElementById('noteAudioToggle');
     const selectAllNotesButton = document.getElementById('selectAllNotesButton');
     const closeSettingsButton = document.getElementById('closeSettingsButton');
     const saveSettingsButton = document.getElementById('saveSettingsButton');
@@ -636,6 +658,7 @@
     const trailsToLevelTwo = 5;
 
     const settingsStorageKey = 'jogoNotinhasNotasSelecionadas';
+    const noteAudioStorageKey = 'jogoNotinhasAudioNotas';
     let currentCelebrationImage = 1;
 
     function getSavedNoteNames() {
@@ -657,8 +680,18 @@
       localStorage.setItem(settingsStorageKey, JSON.stringify(noteNames));
     }
 
+    function getSavedNoteAudioEnabled() {
+      const saved = localStorage.getItem(noteAudioStorageKey);
+      return saved === null ? true : saved === 'true';
+    }
+
+    function saveNoteAudioEnabled(enabled) {
+      localStorage.setItem(noteAudioStorageKey, String(enabled));
+    }
+
     function createSettingsOptions() {
       const savedNoteNames = getSavedNoteNames();
+      noteAudioToggle.checked = getSavedNoteAudioEnabled();
 
       notes.forEach((item) => {
         const label = document.createElement('label');
@@ -696,6 +729,7 @@
 
     function saveSettings() {
       const selectedNames = [...noteOptions.querySelectorAll('input:checked')].map(input => input.value);
+      const noteAudioEnabled = noteAudioToggle.checked;
 
       if (selectedNames.length === 0) {
         message.textContent = 'Escolha pelo menos uma nota para treinar.';
@@ -705,6 +739,7 @@
 
       activeNotes = notes.filter(item => selectedNames.includes(item.name));
       saveNoteNames(selectedNames);
+      saveNoteAudioEnabled(noteAudioEnabled);
       closeSettings();
       if (gameStarted) {
         restartGame();
@@ -770,6 +805,7 @@
 
     function speakNote(noteName) {
       // Fala a nota usando a voz do próprio navegador.
+      if (!getSavedNoteAudioEnabled()) return;
       if (!('speechSynthesis' in window)) return;
 
       window.speechSynthesis.cancel();
